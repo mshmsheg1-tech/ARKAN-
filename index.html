@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>اركان | Aarkan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      font-family: "Amiri", serif;
+      padding-bottom: 80px;
+    }
+    .fade-out {
+      opacity: 1;
+      transition: opacity 2.2s ease-out;
+    }
+    .fade-out.hidden {
+      opacity: 0;
+    }
+    #splash-screen img {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+    }
+    .order-card {
+      transition: all 0.3s ease;
+    }
+    .order-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .tray-card {
+      transition: all 0.3s ease;
+    }
+    .tray-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .size-pill {
+      transition: all 0.2s ease;
+    }
+    .size-pill.active {
+      border-color: #10B981;
+      background-color: #ECFDF5;
+      color: #047857;
+    }
+    .size-pill.inactive {
+      border-color: #E5E7EB;
+      background-color: #F9FAFB;
+      color: #374151;
+    }
+    .size-pill:hover {
+      transform: scale(1.02);
+    }
+    /* LTR Support */
+    html[dir="ltr"] .rtl-only { display: none; }
+    html[dir="ltr"] .ltr-only { display: none; }
+    html[dir="ltr"] { direction: ltr; }
+    html[dir="ltr"] .flex-row-reverse { flex-direction: row; }
+    html[dir="ltr"] .text-right { text-align: right; }
+    html[dir="ltr"] .text-left { text-align: left; }
+    html[dir="ltr"] .mr-2 { margin-right: 0.5rem; margin-left: 0; }
+    html[dir="ltr"] .ml-2 { margin-left: 0.5rem; margin-right: 0; }
+    html[dir="ltr"] .space-x-2 > * + * { margin-left: 0.5rem; margin-right: 0; }
+    html[dir="ltr"] .space-x-3 > * + * { margin-left: 0.75rem; margin-right: 0; }
+    html[dir="ltr"] .space-x-reverse > * + * { margin-left: 0.5rem; margin-right: 0; }
+  </style>
+</head>
+<body class="bg-gray-100 p-5 h-screen flex flex-col items-center overflow-hidden">
+  
+  <!-- Splash Screen -->
+  <div aria-atomic="true" aria-live="assertive" class="fixed inset-0 bg-green-900 flex items-center justify-center fade-out" id="splash-screen" role="alert">
+    <img alt="شاشة تحميل" src="https://i.postimg.cc/mgD71zHp/file-00000000a9107246baa1d3b13b64e536.png" width="60%" height="60%" />
+  </div>
+  
+  <!-- Main Content (Order Form) -->
+  <div aria-label="نموذج الطلب" class="max-w-lg w-full bg-white p-6 rounded-lg shadow-lg hidden flex-grow overflow-auto" id="main-content" role="main">
+    <form class="space-y-4" id="order-form" novalidate>
+      <div class="flex flex-col">
+        <label class="mb-2 text-gray-700" for="name" id="name-label">الاسم</label>
+        <input aria-required="true" class="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500" id="name" name="name" required type="text" />
+      </div>
+      <div class="flex flex-col">
+        <label class="mb-2 text-gray-700" for="address" id="address-label">العنوان</label>
+        <input aria-required="true" class="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500" id="address" name="address" required type="text" />
+      </div>
+      <div class="flex flex-col">
+        <label class="mb-2 text-gray-700" for="phone" id="phone-label">رقم الهاتف</label>
+        <input aria-required="true" class="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500" id="phone" name="phone" pattern="^\+?\d{7,15}$" required title="يرجى إدخال رقم هاتف صالح" type="tel" />
+      </div>
+      <div class="flex flex-col">
+        <label class="mb-2 text-gray-700" for="order-details" id="order-details-label">تفاصيل الطلبية</label>
+        <textarea aria-required="true" class="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500" id="order-details" name="order-details" required rows="3"></textarea>
+      </div>
+      <button class="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 mt-4" id="submit-button" style="height: 1cm" type="submit">إرسال البيانات</button>
+    </form>
+  </div>
+
+  <!-- Orders Page -->
+  <div aria-label="الطلبات" class="max-w-lg w-full bg-white p-6 rounded-lg shadow-lg hidden flex-grow overflow-auto" id="orders-content" role="region">
+    <h2 class="text-2xl font-bold mb-4" id="orders-title">الطلبات</h2>
+    <ul aria-live="polite" aria-relevant="additions" class="space-y-4" id="orders-list" tabindex="0"></ul>
+  </div>
+
+  <!-- Profile Page -->
+  <div aria-label="الملف الشخصي" class="max-w-lg w-full bg-white p-6 rounded-lg shadow-lg hidden flex-grow overflow-auto" id="profile-content" role="region">
+    <div class="text-center mb-6">
+      <div class="w-24 h-24 bg-green-100 rounded-full mx-auto flex items-center justify-center mb-3">
+        <i class="fas fa-user text-4xl text-green-600"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-800" id="profile-name">مرحباً، العميل</h2>
+      <p class="text-gray-500 text-sm">إدارة حسابك وبياناتك</p>
+    </div>
+
+    <!-- Personal Data -->
+    <div class="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
+      <h3 class="font-bold text-gray-700 mb-3 border-b pb-2" id="profile-data-title">بياناتي الشخصية</h3>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs text-gray-500 block">الاسم</label>
+          <input type="text" id="profile-name-input" class="w-full bg-white border rounded p-2 text-sm" value="">
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 block">رقم الهاتف</label>
+          <input type="tel" id="profile-phone-input" class="w-full bg-white border rounded p-2 text-sm" value="">
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 block">العنوان</label>
+          <input type="text" id="profile-address-input" class="w-full bg-white border rounded p-2 text-sm" value="">
+        </div>
+        <button onclick="saveProfileData()" class="w-full bg-green-500 text-white py-2 rounded text-sm mt-2 hover:bg-green-600" id="save-profile-btn">حفظ البيانات</button>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
+      <h3 class="font-bold text-gray-700 mb-3 border-b pb-2" id="profile-settings-title">الإعدادات</h3>
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-gray-700">اللغة</span>
+          <button id="language-toggle" class="bg-white border border-gray-300 px-3 py-1 rounded text-sm hover:bg-gray-100">عربي</button>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-gray-700">الوضع الليلي</span>
+          <button class="bg-white border border-gray-300 px-3 py-1 rounded text-sm hover:bg-gray-100">قريباً</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- قسم الطلبات -->
+    <div class="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
+      <h3 class="font-bold text-gray-700 mb-3 border-b pb-2" id="profile-orders-title">الطلبات</h3>
+            <button onclick="document.getElementById('orders-link').click()" class="w-full bg-white border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-center" id="view-orders-btn">
+        <i class="fas fa-history ml-2"></i> عرض جميع الطلبات
+      </button>
+    </div>
+
+    <!-- قسم الدعم -->
+    <div class="text-center mt-4">
+      <a href="https://wa.me/201019964505" target="_blank" class="text-green-600 text-sm hover:underline" id="profile-contact-title">تواصل مع الدعم الفني</a>
+    </div>
+  </div>
+
+  <!-- Categories Page -->
+  <div aria-label="الأصناف" class="max-w-lg w-full bg-white p-6 rounded-lg shadow-lg hidden flex-grow overflow-auto" id="categories-content" role="region">
+    <h2 class="text-2xl font-bold mb-4" id="categories-title">الأصناف</h2>
+    <div class="grid grid-cols-2 gap-4">
+      <!-- Salim Vegetables -->
+      <div aria-label="خضار ساليم" class="border border-gray-300 p-2 rounded shadow-sm cursor-pointer" id="salim-link" role="button" tabindex="0">
+        <img alt="خضار ساليم" class="w-full h-auto rounded" height="200" src="https://i.postimg.cc/vH0pB4r3/IMG.jpg" width="300" />
+        <p class="text-sm"><strong>الصنف:</strong> خضار ساليم</p>
+        <p class="text-sm"><strong>الوصف:</strong> خضار طازج غير مطبوخ</p>
+      </div>
+      
+      <!-- Ready Veg -->
+      <div aria-label="خضار جاهز" class="border border-gray-300 p-2 rounded shadow-sm cursor-pointer" role="button" tabindex="0" id="ready-veg-link">
+        <img alt="خضار جاهز" class="w-full h-auto rounded" height="300" src="https://i.postimg.cc/NM7xD9qr/FB-IMG-1749833848317.jpg" width="300" />
+        <p class="text-sm"><strong>الصنف:</strong> خضار جاهز</p>
+        <p class="text-sm"><strong>الوصف:</strong> خضار مغسول ومقطع جاهز للطهي</p>
+      </div>
+      <!-- On Cook -->
+           <div aria-label="أكل على التسوية" class="border border-gray-300 p-2 rounded shadow-sm cursor-pointer" role="button" tabindex="0" id="on-cook-veg-link">
+        <img alt="أكل على التسوية" class="w-full h-auto rounded" height="200" src="https://i.postimg.cc/qqs3ktzL/FB-IMG-1749831638954.jpg" width="300" />
+        <p class="text-sm"><strong>الصنف:</strong> أكل على التسوية</p>
+        <p class="text-sm"><strong>الوصف:</strong> أطعمة جاهزة للطهي النهائي</p>
+      </div>
+      <!-- Cooked Veg -->
+      <div aria-label="أكل مستوي" class="border border-gray-300 p-2 rounded shadow-sm cursor-pointer" role="button" tabindex="0" id="cooked-veg-link">
+        <img alt="أكل مستوي" class="w-full h-auto rounded" height="100" src="https://i.postimg.cc/qBwLC3xP/FB-IMG-1749833944637.jpg" width="300" />
+        <p class="text-sm"><strong>الصنف:</strong> أكل مستوي</p>
+        <p class="text-sm"><strong>الوصف:</strong> أطعمة مطبوخة جاهزة للأكل</p>
+      </div>
+      <!-- Takeaway -->
+      <div aria-label="تيك أوي" class="border border-gray-300 p-2 rounded shadow-sm cursor-pointer" role="button" tabindex="0" id="takeaway-veg-link">
+        <img alt="تيك أوي" class="w-full h-auto rounded" height="200" src="https://i.postimg.cc/L5x3dcs9/FB-IMG-1749833879618.jpg" width="300" />
+        <p class="text-sm"><strong>الصنف:</strong> تيك أوي</p>
+        <p class="text-sm"><strong>الوصف:</strong> أطعمة جاهزة للتناول خارج المنزل</p>
+      </div>
+      <!-- Trays -->
+      <div aria-label="صينية" class="border border-gray-300 p-2 rounded shadow-sm cursor-pointer" role="button" tabindex="0" id="tray-veg-link">
+        <img alt="صينية طعام" class="w-full h-auto rounded" height="200" src="https://i.postimg.cc/mgfp4P6j/FB-IMG-1772749734720.jpg" width="300" />
+        <p class="text-sm"><strong>الصنف:</strong> صينية</p>
+        <p class="text-sm"><strong>الوصف:</strong> صواني الطعام الجاهزة</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart Page -->
+  <div aria-label="صفحة سلة المشتريات" class="max-w-lg w-full bg-white p-6 rounded-lg shadow-lg hidden flex-grow overflow-auto" id="cart-content" role="region">
+    <h2 class="text-2xl font-bold mb-4" id="cart-title">سلة المشتريات</h2>
+    <ul aria-live="polite" aria-relevant="additions" class="space-y-4" id="cart-list" tabindex="0"></ul>
+        <button id="checkout-btn" class="hidden w-full bg-green-500 text-white py-3 rounded-lg font-bold mt-4 hover:bg-green-600 transition">إتمام الطلب عبر الواتساب</button>
+  </div>
+
+    <!-- صفحة خضار ساليم -->
+  <div aria-label="صفحة خضار ساليم" class="max-w-lg w-full bg-white p-6 rounded-lg shadow-lg hidden flex-grow overflow-auto" id="salim-content" role="region">
+    <div class="flex items-center mb-4">
+      <button aria-label="عودة" class="text-gray-700 hover:text-green-500" id="back-button"><i class="fas fa-arrow-right text-2xl"></i></button>
+      <h2 class="text-2xl font-bold mx-auto" id="salim-title">خضار ساليم</h2>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mt-4" id="salim-products-grid">
+      <!-- المنتج 1: شلة الفضاء -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="طماطم" class="max-w-full max-h-full object-contain" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3DRPxLp5XH4U1fUPLQwkWQn7fUd368gb2lUCx9qEKuUb5LhktbVpEcMTg_3EP_rx99pWkU_cdJ_ZETZlfswgCjwu5DhipxhHqNXYkPJ0&s=10" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">طماطم</h3>
+          <p class="text-[10px] text-gray-500 mb-1"></p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'طماطم ربع', 5)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="5">
+              <span>ربع</span>
+              <span class="text-green-600 font-bold">5</span>
+            </button>
+            <button onclick="selectTraySize(this, 'طماطم نص', 10)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="10">
+              <span>نص</span>
+              <span class="text-green-600 font-bold">10</span>
+            </button>
+            <button onclick="selectTraySize(this, 'طماطم كيلو', 20)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="20">
+              <span>كيلو</span>
+              <span class="text-green-600 font-bold">20</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">5 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="ربع طماطم" data-price="265">
+              <i class="fas fa-shopping-cart"></i>
+              <span>ربع طماطم</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- المنتج 2: وجبة خاصة -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="وجبة خاصة" class="max-w-full max-h-full object-contain" src="https://cairofoodgroup.com/wp-content/uploads/2023/03/WhatsApp-Image-2023-03-21-at-11.08.00-PM.jpeg" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">وجبة خاصة</h3>
+          <p class="text-[10px] text-gray-500 mb-1">وجبة متكاملة</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'وجبة خاصة صغيرة', 200)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="200">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">200</span>
+            </button>
+            <button onclick="selectTraySize(this, 'وجبة خاصة متوسطة', 250)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="250">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">250</span>
+            </button>
+            <button onclick="selectTraySize(this, 'وجبة خاصة كبيرة', 300)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="300">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">300</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">200 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="وجبة خاصة صغيرة" data-price="200">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- المنتج 3: صينية مكرونة بشاميل -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="صينية مكرونة بشاميل" class="max-w-full max-h-full object-contain" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZvv0zC-d5D5GgYDTzulWj_1P3H9A66w3JhQ&s" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">صينية مكرونة بشاميل</h3>
+          <p class="text-[10px] text-gray-500 mb-1">تصلح لـ 2-3 أشخاص</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل صغيرة', 165)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="165">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">165</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل متوسطة', 225)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="225">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">225</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل كبيرة', 275)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="275">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">275</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">165 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="صينية مكرونة بشاميل صغيرة" data-price="165">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- المنتج 4: صينية جلاش بالمفروم -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="صينية جلاش بالمفروم" class="max-w-full max-h-full object-contain" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxEREhUSEBIWFhUWFxgYGBcYGRUeGRUXGBYXGBUXGhcaHSghGxslHhcYIjEhJikrLi4uGB8zODMsNygtLisBCgoKDg0OFw8QGC0dIB0tLS0tLTcrLSstLS0tLS4rKy0tOC03LS0tLS0tLS0tKy0uNSsrLS0tKystLSsrLS0tK//AABEIAOEA4QMBIgACEQEDEQH/xAAcAAEAAgIDAQAAAAAAAAAAAAAABgcEBQIDCAH/xAA9EAABAgMGAwUFBwMEAwAAAAABAAIDBBEFBhIhMUFRYXEHEyKBkTKhsdHwFCNCUmJywUOC4TOS0vEVU6L/xAAZAQEBAQEBAQAAAAAAAAAAAAAAAQIDBAX/xAAhEQEBAQEAAgICAwEAAAAAAAAAARECAzESIQRRQWFxE//aAAwDAQACEQMRAD8AvFERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQFpLatl0GI1gbStCCdHcRyW7WvtuzxHhltBiGbeo281y806vF+NyldtnT7Izat13G4/wstQBs93JGJ2F2mVdV2z18nwXNYcyRUZV0NCDTPzXDx/ly5Op9k2p0i1NhW9Cmm+E0cBm3+QtsvXLs0ERFQREQEREBERAREQEREBERAREQEREBERAREQEREBfCvqIKrtBrosR+InXFqMjUZAdeKjfaDDJECNBiloDSxwFKk4q57V1yVlXrsSmKPCGWsRoGY1q8euY81RN7Xx3F8PG5wa4uc07aYaDTCMzlx5L5/j8N58rfP7rbQ7JtGC0TMs8vFK+H2x5fJSq6na65tIdoM1yDxqKZHEFDblX57mkGazYCCHbtI48Qptbl0ZS0W9/AcGvcKhzaUd1pqvetxalmWpBmWB8CIHtPDUdRssxeYWTFoWNGFS5orkRmx4+tlblze0+XmgGTBEOJx/CfkmsWLCRcWPBAIIIOhGhXJVBERAREQEREBERAREQEREBERAREQEREBFizFoQoZo5wBG2a09oW8QCWeFv5t/8AC5d+bjj3RIkUNg2q97SO/wBdNK/NRm9bZuGBElHuDxq3E4B4/SScnA/h324Lnz+Vx0T7WwoBfvs7bN0jShEOODv7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" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">صينية جلاش بالمفروم</h3>
+          <p class="text-[10px] text-gray-500 mb-1">تصلح لـ 3-4 أشخاص</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم صغيرة', 160)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="160">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">160</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم متوسطة', 220)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="220">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">220</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم كبيرة', 270)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="270">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">270</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">160 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="صينية جلاش بالمفروم صغيرة" data-price="160">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+  
+      <!-- المنتجات الجديدة المضافة -->
+     
+
+  <!-- Ready Veg Page -->
+  <div aria-label="صفحة خضار جاهز" class="max-w-lg w-full bg-white p-6 rounded-lg shadow-lg hidden flex-grow overflow-auto" id="ready-veg-content" role="region">
+    <div class="flex items-center mb-4">
+      <button aria-label="عودة" class="text-gray-700 hover:text-green-500" id="ready-veg-back-button"><i class="fas fa-arrow-right text-2xl"></i></button>
+      <h2 class="text-2xl font-bold mx-auto" id="ready-veg-title">خضار جاهز</h2>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mt-4" id="ready-veg-products-grid">
+      <!-- المنتج 1: شلة الفضاء -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="شلة الفضاء" class="max-w-full max-h-full object-contain" src="https://images.deliveryhero.io/image/talabat/MenuItems/2_4638834305244655647.png?width=172&height=172" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">شلة الفضاء</h3>
+          <p class="text-[10px] text-gray-500 mb-1">2 سندوتش برجر</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'شلة الفضاء صغيرة', 265)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="265">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">265</span>
+            </button>
+            <button onclick="selectTraySize(this, 'شلة الفضاء متوسطة', 320)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="320">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">320</span>
+            </button>
+            <button onclick="selectTraySize(this, 'شلة الفضاء كبيرة', 380)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="380">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">380</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">265 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="شلة الفضاء صغيرة" data-price="265">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- المنتج 2: صينية مكرونة بشاميل -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="صينية مكرونة بشاميل" class="max-w-full max-h-full object-contain" src="https://i.postimg.cc/02pqR1yJ/FB-IMG-1772747020262.jpg" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">صينية مكرونة بشاميل</h3>
+          <p class="text-[10px] text-gray-500 mb-1">تصلح لـ 2-3 أشخاص</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل صغيرة', 165)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="165">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">165</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل متوسطة', 225)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="225">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">225</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل كبيرة', 275)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="275">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">275</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">165 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="صينية مكرونة بشاميل صغيرة" data-price="165">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- المنتج 3: صينية جلاش بالمفروم -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="صينية جلاش بالمفروم" class="max-w-full max-h-full object-contain" src="https://i.postimg.cc/HWNQGFPb/FB-IMG-1772747623931.jpg" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">صينية جلاش بالمفروم</h3>
+          <p class="text-[10px] text-gray-500 mb-1">تصلح لـ 3-4 أشخاص</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم صغيرة', 160)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="160">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">160</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم متوسطة', 220)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="220">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">220</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم كبيرة', 270)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="270">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">270</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">160 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="صينية جلاش بالمفروم صغيرة" data-price="160">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+
+      <!-- On Cook Page -->
+  <div aria-label="صفحة أكل على التسوية" class="max-w-lg w-full bg-white p-6 rounded-lg shadow-lg hidden flex-grow overflow-auto" id="on-cook-veg-content" role="region">
+    <div class="flex items-center mb-4">
+      <button aria-label="عودة" class="text-gray-700 hover:text-green-500" id="on-cook-veg-back-button"><i class="fas fa-arrow-right text-2xl"></i></button>
+      <h2 class="text-2xl font-bold mx-auto" id="on-cook-veg-title">أكل على التسوية</h2>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mt-4" id="on-cook-veg-products-grid">
+      <!-- المنتج 1: شلة الفضاء -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="شلة الفضاء" class="max-w-full max-h-full object-contain" src="https://images.deliveryhero.io/image/talabat/MenuItems/2_4638834305244655647.png?width=172&height=172" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">شلة الفضاء</h3>
+          <p class="text-[10px] text-gray-500 mb-1">2 سندوتش برجر</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'شلة الفضاء صغيرة', 265)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="265">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">265</span>
+            </button>
+            <button onclick="selectTraySize(this, 'شلة الفضاء متوسطة', 320)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="320">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">320</span>
+            </button>
+            <button onclick="selectTraySize(this, 'شلة الفضاء كبيرة', 380)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="380">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">380</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">265 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="شلة الفضاء صغيرة" data-price="265">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- المنتج 2: طماطم -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="طماطم" class="max-w-full max-h-full object-contain" src="https://images.deliveryhero.io/image/talabat/MenuItems/2_4638834305244655647.png?width=172&height=172" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">طماطم</h3>
+          <p class="text-[10px] text-gray-500 mb-1">٢٥٠ جرام</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'طماطم صغيرة', 5)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="5">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">5</span>
+            </button>
+            <button onclick="selectTraySize(this, 'طماطم متوسطة', 8)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="8">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">8</span>
+            </button>
+            <button onclick="selectTraySize(this, 'طماطم كبيرة', 12)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="12">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">12</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">5 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="طماطم صغيرة" data-price="5">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- المنتج 3: صينية مكرونة بشاميل -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="صينية مكرونة بشاميل" class="max-w-full max-h-full object-contain" src="https://i.postimg.cc/02pqR1yJ/FB-IMG-1772747020262.jpg" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">صينية مكرونة بشاميل</h3>
+          <p class="text-[10px] text-gray-500 mb-1">تصلح لـ 2-3 أشخاص</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل صغيرة', 165)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="165">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">165</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل متوسطة', 225)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="225">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">225</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل كبيرة', 275)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="275">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">275</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">165 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="صينية مكرونة بشاميل صغيرة" data-price="165">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- المنتج 4: صينية جلاش بالمفروم -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="صينية جلاش بالمفروم" class="max-w-full max-h-full object-contain" src="https://i.postimg.cc/HWNQGFPb/FB-IMG-1772747623931.jpg" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">صينية جلاش بالمفروم</h3>
+          <p class="text-[10px] text-gray-500 mb-1">تصلح لـ 3-4 أشخاص</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم صغيرة', 160)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="160">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">160</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم متوسطة', 220)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="220">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">220</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم كبيرة', 270)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="270">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">270</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">160 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="صينية جلاش بالمفروم صغيرة" data-price="160">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+  
+
+    <!-- Cooked Veg Page -->
+  <div aria-label="صفحة أكل مستوي" class="max-w-lg w-full bg-white p-6 rounded-lg shadow-lg hidden flex-grow overflow-auto" id="cooked-veg-content" role="region">
+    <div class="flex items-center mb-4">
+      <button aria-label="عودة" class="text-gray-700 hover:text-green-500" id="cooked-veg-back-button"><i class="fas fa-arrow-right text-2xl"></i></button>
+      <h2 class="text-2xl font-bold mx-auto" id="cooked-veg-title">أكل مستوي</h2>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mt-4" id="cooked-veg-products-grid">
+      <!-- المنتج 1: شلة الفضاء -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="شلة الفضاء" class="max-w-full max-h-full object-contain" src="https://images.deliveryhero.io/image/talabat/MenuItems/2_4638834305244655647.png?width=172&height=172" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">شلة الفضاء</h3>
+          <p class="text-[10px] text-gray-500 mb-1">2 سندوتش برجر</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'شلة الفضاء صغيرة', 265)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="265">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">265</span>
+            </button>
+            <button onclick="selectTraySize(this, 'شلة الفضاء متوسطة', 320)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="320">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">320</span>
+            </button>
+            <button onclick="selectTraySize(this, 'شلة الفضاء كبيرة', 380)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="380">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">380</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">265 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="شلة الفضاء صغيرة" data-price="265">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- المنتج 2: وجبة خاصة -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="وجبة خاصة" class="max-w-full max-h-full object-contain" src="https://images.deliveryhero.io/image/talabat/MenuItems/2_4638834305244655647.png?width=172&height=172" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">وجبة خاصة</h3>
+          <p class="text-[10px] text-gray-500 mb-1">وجبة متكاملة</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'وجبة خاصة صغيرة', 180)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="180">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">180</span>
+            </button>
+            <button onclick="selectTraySize(this, 'وجبة خاصة متوسطة', 230)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="230">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">230</span>
+            </button>
+            <button onclick="selectTraySize(this, 'وجبة خاصة كبيرة', 280)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="280">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">280</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">180 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="وجبة خاصة صغيرة" data-price="180">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- المنتج 3: صينية مكرونة بشاميل -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="صينية مكرونة بشاميل" class="max-w-full max-h-full object-contain" src="https://i.postimg.cc/02pqR1yJ/FB-IMG-1772747020262.jpg" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">صينية مكرونة بشاميل</h3>
+          <p class="text-[10px] text-gray-500 mb-1">تصلح لـ 2-3 أشخاص</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل صغيرة', 165)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="165">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">165</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل متوسطة', 225)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="225">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">225</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل كبيرة', 275)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="275">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">275</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">165 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="صينية مكرونة بشاميل صغيرة" data-price="165">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- المنتج 4: صينية جلاش بالمفروم -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="صينية جلاش بالمفروم" class="max-w-full max-h-full object-contain" src="https://i.postimg.cc/HWNQGFPb/FB-IMG-1772747623931.jpg" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">صينية جلاش بالمفروم</h3>
+          <p class="text-[10px] text-gray-500 mb-1">تصلح لـ 3-4 أشخاص</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم صغيرة', 160)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="160">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">160</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم متوسطة', 220)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="220">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">220</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم كبيرة', 270)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="270">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">270</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">160 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="صينية جلاش بالمفروم صغيرة" data-price="160">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+
+    <!-- Takeaway Page -->
+  <div aria-label="صفحة تيك أوي" class="max-w-lg w-full bg-white p-6 rounded-lg shadow-lg hidden flex-grow overflow-auto" id="takeaway-veg-content" role="region">
+    <div class="flex items-center mb-4">
+      <button aria-label="عودة" class="text-gray-700 hover:text-green-500" id="takeaway-veg-back-button"><i class="fas fa-arrow-right text-2xl"></i></button>
+      <h2 class="text-2xl font-bold mx-auto" id="takeaway-veg-title">تيك أوي</h2>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mt-4" id="takeaway-veg-products-grid">
+      <!-- المنتج 1: شلة الفضاء -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="شلة الفضاء" class="max-w-full max-h-full object-contain" src="https://images.deliveryhero.io/image/talabat/MenuItems/2_4638834305244655647.png?width=172&height=172" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">شلة الفضاء</h3>
+          <p class="text-[10px] text-gray-500 mb-1">2 سندوتش برجر</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'شلة الفضاء صغيرة', 265)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="265">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">265</span>
+            </button>
+            <button onclick="selectTraySize(this, 'شلة الفضاء متوسطة', 320)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="320">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">320</span>
+            </button>
+            <button onclick="selectTraySize(this, 'شلة الفضاء كبيرة', 380)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="380">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">380</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">265 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="شلة الفضاء صغيرة" data-price="265">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- المنتج 2: وجبة خاصة -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="وجبة خاصة" class="max-w-full max-h-full object-contain" src="https://i.postimg.cc/mgfp4P6j/FB-IMG-1772749734720.jpg" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">وجبة خاصة</h3>
+          <p class="text-[10px] text-gray-500 mb-1">وجبة متكاملة</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'وجبة خاصة صغيرة', 180)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="180">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">180</span>
+            </button>
+            <button onclick="selectTraySize(this, 'وجبة خاصة متوسطة', 230)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="230">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">230</span>
+            </button>
+            <button onclick="selectTraySize(this, 'وجبة خاصة كبيرة', 280)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="280">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">280</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">180 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="وجبة خاصة صغيرة" data-price="180">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- المنتج 3: صينية مكرونة بشاميل -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="صينية مكرونة بشاميل" class="max-w-full max-h-full object-contain" src="https://i.postimg.cc/02pqR1yJ/FB-IMG-1772747020262.jpg" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">صينية مكرونة بشاميل</h3>
+          <p class="text-[10px] text-gray-500 mb-1">تصلح لـ 2-3 أشخاص</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل صغيرة', 165)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="165">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">165</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل متوسطة', 225)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="225">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">225</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل كبيرة', 275)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="275">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">275</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">165 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="صينية مكرونة بشاميل صغيرة" data-price="165">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- المنتج 4: صينية جلاش بالمفروم -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="صينية جلاش بالمفروم" class="max-w-full max-h-full object-contain" src="https://i.postimg.cc/HWNQGFPb/FB-IMG-1772747623931.jpg" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900">صينية جلاش بالمفروم</h3>
+          <p class="text-[10px] text-gray-500 mb-1">تصلح لـ 3-4 أشخاص</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم صغيرة', 160)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="160">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">160</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم متوسطة', 220)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="220">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">220</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم كبيرة', 270)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="270">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">270</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">160 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="صينية جلاش بالمفروم صغيرة" data-price="160">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+
+      <!-- Trays Page (With Size Selection) -->
+  <div aria-label="صفحة صينية" class="max-w-lg w-full bg-white p-4 rounded-lg shadow-lg hidden flex-grow overflow-auto" id="tray-veg-content" role="region">
+    <div class="flex items-center mb-3">
+      <button aria-label="عودة" class="text-gray-700 hover:text-green-500" id="tray-veg-back-button"><i class="fas fa-arrow-right text-2xl"></i></button>
+      <h2 class="text-xl font-bold mx-auto" id="tray-veg-title">صواني الطعام</h2>
+    </div>
+    
+    <!-- شبكة الصواني (صنفين بجانب بعض) -->
+    <div class="grid grid-cols-2 gap-2" id="trays-grid">
+      
+      <!-- صينية 1: مكرونة -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="صينية مكرونة بشاميل" class="max-w-full max-h-full object-contain" src="https://i.postimg.cc/02pqR1yJ/FB-IMG-1772747020262.jpg" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900" id="tray-chicken-title">صينية مكرونة بشاميل</h3>
+          <p class="text-[10px] text-gray-500 mb-1">تصلح لـ 2-3 أشخاص</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل صغيرة', 165)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="165">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">165</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل متوسطة', 225)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="225">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">225</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية مكرونة بشاميل كبيرة', 275)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="275">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">275</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">165 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="صينية مكرونة بشاميل صغيرة" data-price="165">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- صينية 2: جلاش -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="صينية جلاش بالمفروم" class="max-w-full max-h-full object-contain" src="https://i.postimg.cc/HWNQGFPb/FB-IMG-1772747623931.jpg" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900" id="tray-meat-title">صينية جلاش بالمفروم</h3>
+          <p class="text-[10px] text-gray-500 mb-1">تصلح لـ 3-4 أشخاص</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم صغيرة', 160)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="160">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">160</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم متوسطة', 220)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="220">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">220</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية جلاش بالمفروم كبيرة', 270)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="270">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">270</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">160 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="صينية جلاش بالمفروم صغيرة" data-price="160">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- صينية 3: كبدة -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="صينية كبدة" class="max-w-full max-h-full object-contain" src="https://images.deliveryhero.io/image/talabat/MenuItems/2_4638834305244655647.png?width=172&height=172" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900" id="tray-liver-title">صينية كبدة</h3>
+          <p class="text-[10px] text-gray-500 mb-1">تصلح لـ 2-3 أشخاص</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'صينية كبدة صغيرة', 110)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="110">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">110</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية كبدة متوسطة', 160)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="160">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">160</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية كبدة كبيرة', 220)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="220">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">220</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">110 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="صينية كبدة صغيرة" data-price="110">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- صينية 4: سمك -->
+      <article class="tray-card bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 flex flex-col">
+        <div class="w-full h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img alt="صينية سمك" class="max-w-full max-h-full object-contain" src="https://images.deliveryhero.io/image/talabat/MenuItems/2_4638834305244655647.png?width=172&height=172" />
+        </div>
+        <div class="p-2 flex flex-col flex-grow">
+          <h3 class="text-xs font-semibold mb-1 text-gray-900" id="tray-fish-title">صينية سمك</h3>
+          <p class="text-[10px] text-gray-500 mb-1">تصلح لـ 2-3 أشخاص</p>
+          
+          <!-- أزرار اختيار الحجم -->
+          <div class="mt-1 space-y-1">
+            <button onclick="selectTraySize(this, 'صينية سمك صغيرة', 130)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="صغيرة" data-price="130">
+              <span>صغيرة</span>
+              <span class="text-green-600 font-bold">130</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية سمك متوسطة', 190)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="متوسطة" data-price="190">
+              <span>متوسطة</span>
+              <span class="text-green-600 font-bold">190</span>
+            </button>
+            <button onclick="selectTraySize(this, 'صينية سمك كبيرة', 260)" class="tray-size-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-1 px-2 rounded-lg transition flex justify-between items-center border-2 border-transparent text-xs" data-size="كبيرة" data-price="260">
+              <span>كبيرة</span>
+              <span class="text-green-600 font-bold">260</span>
+            </button>
+          </div>
+
+          <!-- زر الإضافة للسلة -->
+          <div class="mt-2 flex items-center justify-between">
+            <span class="tray-price-display text-yellow-500 font-bold text-xs">130 ج.م</span>
+            <button class="add-to-cart bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-2 py-1 rounded-full transition flex items-center space-x-1 rtl:space-x-reverse text-xs" data-name="صينية سمك صغيرة" data-price="130">
+              <i class="fas fa-shopping-cart"></i>
+              <span>إضافة</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+
+  <!-- شريط التنقل السفلي -->
+  <nav aria-label="قائمة التنقل الرئيسية" class="bg-white p-2 shadow-md fixed bottom-0 inset-x-0 hidden" id="nav-bar" role="navigation">
+    <ul class="flex justify-around">
+      <li>
+        <a aria-label="الملف الشخصي" class="text-gray-700 hover:text-green-500 flex flex-col items-center" href="#profile" id="profile-link" tabindex="0">
+          <i aria-hidden="true" class="fas fa-user text-xl"></i>
+          <span class="block text-xs" id="profile-link-text">الملف الشخصي</span>
+        </a>
+      </li>
+      <li>
+        <a aria-label="الطلبات" class="text-gray-700 hover:text-green-500 flex flex-col items-center" href="#orders" id="orders-link" tabindex="0">
+          <i aria-hidden="true" class="fas fa-list text-xl"></i>
+          <span class="block text-xs" id="orders-link-text">الطلبات</span>
+        </a>
+      </li>
+      <li>
+        <a aria-label="الأصناف" class="text-gray-700 hover:text-green-500 flex flex-col items-center" href="#categories" id="categories-link" tabindex="0">
+          <i aria-hidden="true" class="fas fa-th text-xl"></i>
+          <span class="block text-xs" id="categories-link-text">الأصناف</span>
+        </a>
+      </li>
+      <li>
+        <a aria-label="سلة المشتريات" class="text-gray-700 hover:text-green-500 flex flex-col items-center relative" href="#cart" id="cart-link" tabindex="0">
+          <i aria-hidden="true" class="fas fa-shopping-cart text-xl"></i>
+          <span class="block text-xs" id="cart-link-text">سلة المشتريات</span>
+          <span id="cart-count" class="absolute -top-2 -left-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+        </a>
+      </li>
+      <li>
+        <a aria-label="الرئيسية" class="text-gray-700 hover:text-green-500 flex flex-col items-center" href="#home" id="home-link" tabindex="0">
+          <i aria-hidden="true" class="fas fa-home text-xl"></i>
+          <span class="block text-xs" id="home-link-text">الرئيسية</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- JavaScript Logic -->
+  <script>
+    // متغيرات السلة والطلبات
+    let cart = [];
+    let orders = JSON.parse(localStorage.getItem('arkanOrders')) || [];
+
+    // قاموس الترجمة
+    const translations = {
+      ar: {
+        home: "الرئيسية",
+        orders: "الطلبات",
+        profile: "الملف الشخصي",
+        categories: "الأصناف",
+        cart: "سلة المشتريات",
+        salimTitle: "خضار ساليم",
+        salimDesc: "هذه صفحة خضار ساليم.",
+        readyVegTitle: "خضار جاهز",
+        onCookVegTitle: "أكل على التسوية",
+        cookedVegTitle: "أكل مستوي",
+        takeawayVegTitle: "تيك أوي",
+        trayVegTitle: "صينية",
+        profileName: "مرحباً، العميل",
+        profileDataTitle: "بياناتي الشخصية",
+        profileSettingsTitle: "الإعدادات",
+        profileOrdersTitle: "الطلبات",
+        profileContactTitle: "تواصل معنا",
+        saveProfileBtn: "حفظ البيانات",
+        viewOrdersBtn: "عرض جميع الطلبات",
+        ordersTitle: "الطلبات",
+        cartTitle: "سلة المشتريات",
+        checkoutBtn: "إتمام الطلب عبر الواتساب",
+        emptyCart: "السلة فارغة",
+        total: "الإجمالي المطلوب",
+        name: "الاسم",
+        address: "العنوان",
+        phone: "رقم الهاتف",
+        orderDetails: "تفاصيل الطلبية",
+        submitBtn: "إرسال البيانات",
+        back: "عودة",
+        add: "إضافة",
+        trayChicken: "صينية مكرونة بشاميل",
+        trayMeat: "صينية جلاش بالمفروم",
+        trayLiver: "صينية كبدة",
+        trayFish: "صينية سمك",
+        small: "صغيرة",
+        medium: "متوسطة",
+        large: "كبيرة",
+        validFor: "تصلح لـ",
+        people: "أشخاص",
+        price: "ج.م",
+        addToCart: "إضافة للسلة",
+        delete: "حذف",
+        details: "تفاصيل",
+        confirmDelete: "هل أنت متأكد؟",
+        deleteText: "لن تتمكن من استرجاع هذا الطلب!",
+        deleteConfirm: "نعم، احذفه",
+        deleteCancel: "إلغاء",
+        deleted: "تم الحذف",
+        deletedText: "تم حذف الطلب بنجاح.",
+        saveSuccess: "تم الحفظ",
+        saveText: "تم تحديث بياناتك بنجاح",
+        alertTitle: "تنبيه",
+        alertFill: "يرجى إدخال الاسم ورقم الهاتف",
+        successTitle: "تمت الإضافة للسلة",
+        successText: "تمت الإضافة للسلة",
+        checkoutTitle: "تم الإرسال بنجاح!",
+        checkoutText: "سيتم تحويلك إلى الواتساب لإتمام الطلب",
+        errorTitle: "خطأ",
+        errorSize: "يرجى اختيار حجم للصينية",
+        trayPrice: "السعر المختار"
+      },
+      en: {
+        home: "Home",
+        orders: "Orders",
+        profile: "Profile",
+        categories: "Categories",
+        cart: "Cart",
+        salimTitle: "Salim Vegetables",
+        salimDesc: "This is the Salim vegetables page.",
+        readyVegTitle: "Ready Vegetables",
+        onCookVegTitle: "On Cook Vegetables",
+        cookedVegTitle: "Cooked Vegetables",
+        takeawayVegTitle: "Takeaway",
+        trayVegTitle: "Trays",
+        profileName: "Hello, User",
+        profileDataTitle: "My Data",
+        profileSettingsTitle: "Settings",
+        profileOrdersTitle: "Orders",
+        profileContactTitle: "Contact Us",
+        saveProfileBtn: "Save Data",
+        viewOrdersBtn: "View All Orders",
+        ordersTitle: "Orders",
+        cartTitle: "Shopping Cart",
+        checkoutBtn: "Checkout via WhatsApp",
+        emptyCart: "Cart is empty",
+        total: "Total Required",
+        name: "Name",
+        address: "Address",
+        phone: "Phone Number",
+        orderDetails: "Order Details",
+        submitBtn: "Send Data",
+        back: "Back",
+        add: "Add",
+        trayChicken: "Chicken Tray",
+        trayMeat: "Meat Tray",
+        trayLiver: "Liver Tray",
+        trayFish: "Fish Tray",
+        small: "Small",
+        medium: "Medium",
+        large: "Large",
+        validFor: "Valid for",
+        people: "people",
+        price: "EGP",
+        addToCart: "Add to Cart",
+        delete: "Delete",
+        details: "Details",
+        confirmDelete: "Are you sure?",
+        deleteText: "You won't be able to revert this!",
+        deleteConfirm: "Yes, delete it!",
+        deleteCancel: "Cancel",
+        deleted: "Deleted!",
+        deletedText: "The order has been deleted successfully.",
+        saveSuccess: "Saved!",
+        saveText: "Your data has been updated successfully.",
+        alertTitle: "Alert",
+        alertFill: "Please enter Name and Phone",
+        successTitle: "Added to Cart",
+        successText: "Item added to cart",
+        checkoutTitle: "Sent Successfully!",
+        checkoutText: "Redirecting to WhatsApp to complete order",
+        errorTitle: "Error",
+        errorSize: "Please select a tray size",
+        trayPrice: "Selected Price"
+      }
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+      // استرجاع الطلبات المحفوظة وعرضها
+      renderOrders();
+      // استرجاع بيانات المستخدم
+      loadProfileData();
+
+      setTimeout(function () {
+        document.getElementById("splash-screen").classList.add("hidden");
+        document.getElementById("main-content").classList.remove("hidden");
+        document.getElementById("nav-bar").classList.remove("hidden");
+      }, 5000);
+
+      function hideAllContents() {
+        document.getElementById("main-content").classList.add("hidden");
+        document.getElementById("orders-content").classList.add("hidden");
+        document.getElementById("profile-content").classList.add("hidden");
+        document.getElementById("categories-content").classList.add("hidden");
+        document.getElementById("cart-content").classList.add("hidden");
+        document.getElementById("salim-content").classList.add("hidden");
+        document.getElementById("ready-veg-content").classList.add("hidden");
+        document.getElementById("on-cook-veg-content").classList.add("hidden");
+        document.getElementById("cooked-veg-content").classList.add("hidden");
+        document.getElementById("takeaway-veg-content").classList.add("hidden");
+        document.getElementById("tray-veg-content").classList.add("hidden");
+      }
+
+      // --- Navigation Logic ---
+      document.getElementById("home-link").addEventListener("click", function (e) {
+        e.preventDefault();
+        hideAllContents();
+        document.getElementById("main-content").classList.remove("hidden");
+      });
+
+      document.getElementById("orders-link").addEventListener("click", function (e) {
+        e.preventDefault();
+        hideAllContents();
+        document.getElementById("orders-content").classList.remove("hidden");
+        renderOrders();
+      });
+
+      document.getElementById("profile-link").addEventListener("click", function (e) {
+        e.preventDefault();
+        hideAllContents();
+        document.getElementById("profile-content").classList.remove("hidden");
+        loadProfileData();
+      });
+
+      document.getElementById("categories-link").addEventListener("click", function (e) {
+        e.preventDefault();
+        hideAllContents();
+        document.getElementById("categories-content").classList.remove("hidden");
+      });
+
+      document.getElementById("cart-link").addEventListener("click", function (e) {
+        e.preventDefault();
+        hideAllContents();
+        document.getElementById("cart-content").classList.remove("hidden");
+        renderCart();
+      });
+
+      // --- Language Toggle Logic ---
+      document.getElementById("language-toggle").addEventListener("click", function () {
+        const currentLang = document.documentElement.lang;
+        const newLang = currentLang === "ar" ? "en" : "ar";
+        
+        // تغيير اللغة والاتجاه
+        document.documentElement.lang = newLang;
+        document.documentElement.dir = newLang === "ar" ? "rtl" : "ltr";
+        
+        // تحديث النصوص
+        updateTexts(newLang);
+        
+        // تحديث نص الزر
+        this.textContent = newLang === "ar" ? "English" : "عربي";
+      });
+
+      function updateTexts(lang) {
+        const t = translations[lang];
+        
+        // Navigation
+        document.getElementById("home-link-text").textContent = t.home;
+        document.getElementById("orders-link-text").textContent = t.orders;
+        document.getElementById("profile-link-text").textContent = t.profile;
+        document.getElementById("categories-link-text").textContent = t.categories;
+        document.getElementById("cart-link-text").textContent = t.cart;
+        
+        // Titles
+        document.getElementById("salim-title").textContent = t.salimTitle;
+        document.getElementById("salim-desc").textContent = t.salimDesc;
+        document.getElementById("ready-veg-title").textContent = t.readyVegTitle;
+        document.getElementById("on-cook-veg-title").textContent = t.onCookVegTitle;
+        document.getElementById("cooked-veg-title").textContent = t.cookedVegTitle;
+        document.getElementById("takeaway-veg-title").textContent = t.takeawayVegTitle;
+        document.getElementById("tray-veg-title").textContent = t.trayVegTitle;
+        
+        // Profile
+        document.getElementById("profile-name").textContent = t.profileName;
+        document.getElementById("profile-data-title").textContent = t.profileDataTitle;
+        document.getElementById("profile-settings-title").textContent = t.profileSettingsTitle;
+        document.getElementById("profile-orders-title").textContent = t.profileOrdersTitle;
+        document.getElementById("profile-contact-title").textContent = t.profileContactTitle;
+        document.getElementById("save-profile-btn").textContent = t.saveProfileBtn;
+        document.getElementById("view-orders-btn").textContent = t.viewOrdersBtn;
+        
+        // Orders & Cart
+        document.getElementById("orders-title").textContent = t.ordersTitle;
+        document.getElementById("cart-title").textContent = t.cartTitle;
+        document.getElementById("checkout-btn").textContent = t.checkoutBtn;
+        
+        // Form
+        document.getElementById("name-label").textContent = t.name;
+        document.getElementById("address-label").textContent = t.address;
+        document.getElementById("phone-label").textContent = t.phone;
+        document.getElementById("order-details-label").textContent = t.orderDetails;
+        document.getElementById("submit-button").textContent = t.submitBtn;
+        
+        // Buttons
+        document.getElementById("back-button").title = t.back;
+        document.getElementById("ready-veg-back-button").title = t.back;
+        document.getElementById("on-cook-veg-back-button").title = t.back;
+        document.getElementById("cooked-veg-back-button").title = t.back;
+        document.getElementById("takeaway-veg-back-button").title = t.back;
+        document.getElementById("tray-veg-back-button").title = t.back;
+        
+        // Tray Labels
+        document.getElementById("tray-chicken-title").textContent = t.trayChicken;
+        document.getElementById("tray-meat-title").textContent = t.trayMeat;
+        document.getElementById("tray-liver-title").textContent = t.trayLiver;
+        document.getElementById("tray-fish-title").textContent = t.trayFish;
+        
+        // Sizes
+        document.querySelectorAll('.size-pill').forEach(btn => {
+            const size = btn.getAttribute('data-size');
+            if(size === 'صغيرة' || size === 'small') btn.querySelector('span').textContent = t.small;
+            if(size === 'متوسطة' || size === 'medium') btn.querySelector('span').textContent = t.medium;
+            if(size === 'كبيرة' || size === 'large') btn.querySelector('span').textContent = t.large;
+        });
+      }
+
+      function addToCart(name, price) {
+        const existingItem = cart.find(item => item.name === name);
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          cart.push({ name, price, quantity: 0 });
+        }
+        updateCartCount();
+        
+        const t = translations[document.documentElement.lang];
+        Swal.fire({
+          icon: 'success',
+          title: t.successTitle,
+          text: t.successText,
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+
+      function updateCartCount() {
+        const count = cart.reduce((acc, item) => acc + item.quantity, 0);
+        const badge = document.getElementById("cart-count");
+        badge.textContent = count;
+        if (count > 0) {
+          badge.classList.remove("hidden");
+        } else {
+          badge.classList.add("hidden");
+        }
+      }
+
+      function renderCart() {
+        const cartList = document.getElementById("cart-list");
+        cartList.innerHTML = "";
+        let total = 0;
+        const t = translations[document.documentElement.lang];
+
+        if (cart.length === 0) {
+          cartList.innerHTML = `<div class='text-center text-gray-500 py-8'><i class='fas fa-shopping-basket text-4xl mb-2'></i><p>${t.emptyCart}</p></div>`;
+          document.getElementById("checkout-btn").classList.add("hidden");
+          return;
+        }
+
+        document.getElementById("checkout-btn").classList.remove("hidden");
+
+        cart.forEach((item, index) => {
+          const itemTotal = item.price * item.quantity;
+          total += itemTotal;
+          
+          const li = document.createElement("li");
+          li.className = "flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-200 mb-2";
+          li.innerHTML = `
+            <div class="flex-1">
+              <p class="font-bold text-gray-800">${item.name}</p>
+              <p class="text-sm text-gray-500">${item.price} ${t.price} × ${item.quantity}</p>
+            </div>
+            <div class="flex items-center space-x-3 rtl:space-x-reverse">
+              <button onclick="updateQuantity(${index}, -1)" class="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center hover:bg-gray-300 transition">
+                <i class="fas fa-minus text-xs"></i>
+              </button>
+              <span class="font-bold text-gray-700 w-4 text-center">${item.quantity}</span>
+              <button onclick="updateQuantity(${index}, 1)" class="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center hover:bg-green-200 transition">
+                <i class="fas fa-plus text-xs"></i>
+              </button>
+              <span class="font-bold text-green-600 w-16 text-left">${itemTotal} ${t.price}</span>
+              <button onclick="removeFromCart(${index})" class="text-red-400 hover:text-red-600 p-2">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          `;
+          cartList.appendChild(li);
+        });
+
+        const totalDiv = document.createElement("div");
+        totalDiv.className = "mt-4 p-4 bg-green-50 rounded-lg border border-green-200 text-center";
+        totalDiv.innerHTML = `
+          <p class="text-gray-600">${t.total}</p>
+          <p class="text-3xl font-bold text-green-700">${total} <span class="text-sm">${t.price}</span></p>
+        `;
+        cartList.appendChild(totalDiv);
+      }
+
+      window.updateQuantity = function(index, change) {
+        if (cart[index].quantity + change > 0) {
+          cart[index].quantity += change;
+        } else {
+          removeFromCart(index);
+        }
+        updateCartCount();
+        renderCart();
+      }
+
+      window.removeFromCart = function(index) {
+        cart.splice(index, 1);
+        updateCartCount();
+        renderCart();
+      }
+
+      function checkoutCart() {
+        if (cart.length === 0) return;
+        
+        const savedName = localStorage.getItem('arkanUserName') || '';
+        const savedPhone = localStorage.getItem('arkanUserPhone') || '';
+        const savedAddress = localStorage.getItem('arkanUserAddress') || '';
+
+        let message = "طلب جديد من تطبيق اركان:%0A%0A";
+        let total = 0;
+        let orderItems = [];
+        const t = translations[document.documentElement.lang];
+        
+        cart.forEach(item => {
+          const itemTotal = item.price * item.quantity;
+          message += `• ${item.name}: ${item.price} × ${item.quantity} = ${itemTotal} ${t.price}%0A`;
+          total += itemTotal;
+          orderItems.push({ name: item.name, price: item.price, quantity: item.quantity, total: itemTotal });
+        });
+        
+        message += `%0A----------------%0A`;
+        if(savedName) message += `الاسم: ${savedName}%0A`;
+        if(savedPhone) message += `الهاتف: ${savedPhone}%0A`;
+        if(savedAddress) message += `العنوان: ${savedAddress}%0A`;
+        message += `الإجمالي النهائي: ${total} ${t.price}`;
+
+        const orderData = {
+          id: Date.now(),
+          date: new Date().toLocaleString('ar-EG'),
+          items: orderItems,
+          total: total,
+          status: 'جديد'
+        };
+        saveOrder(orderData);
+
+        const whatsappNumber = "201019964505";
+        window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
+        
+        cart = [];
+        updateCartCount();
+        renderCart();
+      }
+
+      // --- دوال إدارة الطلبات ---
+
+      function saveOrder(orderData) {
+        orders.unshift(orderData);
+        localStorage.setItem('arkanOrders', JSON.stringify(orders));
+        renderOrders();
+      }
+
+      function renderOrders() {
+        const ordersList = document.getElementById("orders-list");
+        ordersList.innerHTML = "";
+        const t = translations[document.documentElement.lang];
+
+        if (orders.length === 0) {
+          ordersList.innerHTML = `
+            <div class="text-center text-gray-500 py-10">
+              <i class="fas fa-receipt text-6xl mb-4 text-gray-300"></i>
+              <p>${t.ordersTitle} فارغة</p>
+            </div>
+          `;
+          return;
+        }
+
+        orders.forEach((order, index) => {
+          const li = document.createElement("li");
+          li.className = "order-card bg-white p-4 rounded-lg shadow border border-gray-200 mb-3";
+          li.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-bold text-lg text-gray-800">طلب رقم #${order.id}</h3>
+                <p class="text-sm text-gray-500 mt-1"><i class="far fa-clock"></i> ${order.date}</p>
+                <span class="inline-block mt-2 px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                  ${order.status}
+                </span>
+              </div>
+              <div class="text-left">
+                <p class="text-green-600 font-bold text-lg">${order.total} ${t.price}</p>
+                <div class="flex space-x-2 rtl:space-x-reverse mt-2">
+                  <button onclick="viewOrderDetails(${index})" class="text-blue-500 hover:text-blue-700" title="${t.details}">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button onclick="deleteOrder(${index})" class="text-red-500 hover:text-red-700" title="${t.delete}">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+          ordersList.appendChild(li);
+        });
+      }
+
+      window.viewOrderDetails = function(index) {
+        const order = orders[index];
+        const t = translations[document.documentElement.lang];
+        let itemsHtml = order.items.map(item => 
+          `<li class="flex justify-between py-1 border-b border-gray-100 last:border-0">
+             <span>${item.name} (x${item.quantity})</span>
+             <span class="font-bold">${item.total} ${t.price}</span>
+           </li>`
+        ).join('');
+
+        Swal.fire({
+          title: `تفاصيل الطلب #${order.id}`,
+          html: `
+            <div class="text-right">
+              <p class="text-gray-600 mb-2">التاريخ: ${order.date}</p>
+              <ul class="text-gray-800 mb-4">${itemsHtml}</ul>
+              <div class="bg-gray-100 p-2 rounded text-center font-bold text-lg">
+                الإجمالي: ${order.total} ${t.price}
+              </div>
+            </div>
+          `,
+          confirmButtonText: 'حسناً',
+          confirmButtonColor: '#10B981'
+        });
+      }
+
+      window.deleteOrder = function(index) {
+        const t = translations[document.documentElement.lang];
+        Swal.fire({
+          title: t.confirmDelete,
+          text: t.deleteText,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: t.deleteConfirm,
+          cancelButtonText: t.deleteCancel
+        }).then((result) => {
+          if (result.isConfirmed) {
+            orders.splice(index, 1);
+            localStorage.setItem('arkanOrders', JSON.stringify(orders));
+            renderOrders();
+            Swal.fire(
+              t.deleted,
+              t.deletedText,
+              'success'
+            )
+          }
+        })
+      }
+
+      // --- دوال الملف الشخصي ---
+      
+      function loadProfileData() {
+        const savedName = localStorage.getItem('arkanUserName') || '';
+        const savedPhone = localStorage.getItem('arkanUserPhone') || '';
+        const savedAddress = localStorage.getItem('arkanUserAddress') || '';
+
+        document.getElementById('profile-name-input').value = savedName;
+        document.getElementById('profile-phone-input').value = savedPhone;
+        document.getElementById('profile-address-input').value = savedAddress;
+        
+        if(savedName) {
+            document.getElementById('profile-name').textContent = `مرحباً، ${savedName}`;
+        }
+      }
+
+      window.saveProfileData = function() {
+        const name = document.getElementById('profile-name-input').value;
+        const phone = document.getElementById('profile-phone-input').value;
+        const address = document.getElementById('profile-address-input').value;
+        const t = translations[document.documentElement.lang];
+
+        if(!name || !phone) {
+            Swal.fire(t.alertTitle, t.alertFill, 'warning');
+            return;
+        }
+
+        localStorage.setItem('arkanUserName', name);
+        localStorage.setItem('arkanUserPhone', phone);
+        localStorage.setItem('arkanUserAddress', address);
+
+        document.getElementById('profile-name').textContent = `مرحباً، ${name}`;
+        
+        Swal.fire({
+            icon: 'success',
+            title: t.saveSuccess,
+            text: t.saveText,
+            timer: 1500,
+            showConfirmButton: false
+        });
+      }
+
+      // --- تغيير اللغة ---
+      
+      document.getElementById("language-toggle").addEventListener("click", function () {
+        const currentLang = document.documentElement.lang;
+        const newLang = currentLang === "ar" ? "en" : "ar";
+        
+        // تغيير اللغة والاتجاه
+        document.documentElement.lang = newLang;
+        document.documentElement.dir = newLang === "ar" ? "rtl" : "ltr";
+        
+        // تحديث النصوص
+        updateTexts(newLang);
+        
+        // تحديث نص الزر
+        this.textContent = newLang === "ar" ? "English" : "عربي";
+      });
+
+      function updateTexts(lang) {
+        const t = translations[lang];
+        
+        // Navigation
+        document.getElementById("home-link-text").textContent = t.home;
+        document.getElementById("orders-link-text").textContent = t.orders;
+        document.getElementById("profile-link-text").textContent = t.profile;
+        document.getElementById("categories-link-text").textContent = t.categories;
+        document.getElementById("cart-link-text").textContent = t.cart;
+        
+        // Titles
+        document.getElementById("salim-title").textContent = t.salimTitle;
+        document.getElementById("salim-desc").textContent = t.salimDesc;
+        document.getElementById("ready-veg-title").textContent = t.readyVegTitle;
+        document.getElementById("on-cook-veg-title").textContent = t.onCookVegTitle;
+        document.getElementById("cooked-veg-title").textContent = t.cookedVegTitle;
+        document.getElementById("takeaway-veg-title").textContent = t.takeawayVegTitle;
+        document.getElementById("tray-veg-title").textContent = t.trayVegTitle;
+        
+        // Profile
+        document.getElementById("profile-name").textContent = t.profileName;
+        document.getElementById("profile-data-title").textContent = t.profileDataTitle;
+        document.getElementById("profile-settings-title").textContent = t.profileSettingsTitle;
+        document.getElementById("profile-orders-title").textContent = t.profileOrdersTitle;
+        document.getElementById("profile-contact-title").textContent = t.profileContactTitle;
+        document.getElementById("save-profile-btn").textContent = t.saveProfileBtn;
+        document.getElementById("view-orders-btn").textContent = t.viewOrdersBtn;
+        
+        // Orders & Cart
+        document.getElementById("orders-title").textContent = t.ordersTitle;
+        document.getElementById("cart-title").textContent = t.cartTitle;
+        document.getElementById("checkout-btn").textContent = t.checkoutBtn;
+        
+        // Form
+        document.getElementById("name-label").textContent = t.name;
+        document.getElementById("address-label").textContent = t.address;
+        document.getElementById("phone-label").textContent = t.phone;
+        document.getElementById("order-details-label").textContent = t.orderDetails;
+        document.getElementById("submit-button").textContent = t.submitBtn;
+        
+        // Buttons
+        document.getElementById("back-button").title = t.back;
+        document.getElementById("ready-veg-back-button").title = t.back;
+        document.getElementById("on-cook-veg-back-button").title = t.back;
+        document.getElementById("cooked-veg-back-button").title = t.back;
+        document.getElementById("takeaway-veg-back-button").title = t.back;
+        document.getElementById("tray-veg-back-button").title = t.back;
+        
+        // Tray Labels
+        document.getElementById("tray-chicken-title").textContent = t.trayChicken;
+        document.getElementById("tray-meat-title").textContent = t.trayMeat;
+        document.getElementById("tray-liver-title").textContent = t.trayLiver;
+        document.getElementById("tray-fish-title").textContent = t.trayFish;
+        
+        // Sizes
+        document.querySelectorAll('.size-pill').forEach(btn => {
+            const size = btn.getAttribute('data-size');
+            if(size === 'صغيرة' || size === 'small') btn.querySelector('span').textContent = t.small;
+            if(size === 'متوسطة' || size === 'medium') btn.querySelector('span').textContent = t.medium;
+            if(size === 'كبيرة' || size === 'large') btn.querySelector('span').textContent = t.large;
+        });
+      }
+
+      // --- روابط الأصناف ---
+            document.getElementById("tray-veg-link").addEventListener("click", function () {
+        hideAllContents();
+        document.getElementById("tray-veg-content").classList.remove("hidden");
+      });
+      document.getElementById("tray-veg-back-button").addEventListener("click", function () {
+        document.getElementById("tray-veg-content").classList.add("hidden");
+        document.getElementById("categories-content").classList.remove("hidden");
+      });
+
+      // --- تفعيل زر الإضافة في جميع الصفحات ---
+      const addButtons = document.querySelectorAll('.add-to-cart');
+      addButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const name = this.getAttribute('data-name');
+          const price = parseFloat(this.getAttribute('data-price'));
+          
+          if(name && price) {
+            addToCart(name, price);
+          } else {
+            const t = translations[document.documentElement.lang];
+            Swal.fire({
+              icon: 'warning',
+              title: t.errorTitle,
+              text: t.errorSize,
+              confirmButtonText: 'حسناً'
+            });
+          }
+        });
+      });
+
+            // تفعيل زر إتمام الطلب في السلة
+      document.getElementById("checkout-btn").addEventListener("click", function() {
+        checkoutCart();
+      });
+
+      // --- نموذج الطلب مع تنبيهات SweetAlert2 ---
+      document.getElementById("order-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const name = document.getElementById("name").value.trim();
+        const address = document.getElementById("address").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const orderDetails = document.getElementById("order-details").value.trim();
+        const t = translations[document.documentElement.lang];
+
+        if (!name || !address || !phone || !orderDetails) {
+          Swal.fire({ 
+            icon: 'warning', 
+            title: t.alertTitle, 
+            text: 'يرجى ملء جميع الحقول',
+            confirmButtonText: 'حسناً'
+          });
+          return;
+        }
+
+        // تحضير نص الرسالة
+        const message = `الاسم: ${name}%0Aالعنوان: ${address}%0Aرقم الهاتف: ${phone}%0Aتفاصيل الطلب: ${orderDetails}`;
+
+        // رقم الواتساب مع رمز الدولة (مصر +20)
+        const whatsappNumber = "201019964505";
+
+        // رابط الواتساب
+        const whatsappURL = `https://wa.me/${whatsappNumber}?text=${message}`;
+
+        // حفظ الطلب في السجل
+        const orderData = {
+          id: Date.now(),
+          date: new Date().toLocaleString('ar-EG'),
+          items: [{ name: "طلب يدوي", price: 0, quantity: 1, total: 0 }],
+          total: 0,
+          status: 'جديد',
+          details: { name, address, phone, orderDetails }
+        };
+        saveOrder(orderData);
+
+        // فتح الواتساب في تبويب جديد
+        window.open(whatsappURL, "_blank");
+        
+        // عرض تنبيه النجاح
+        Swal.fire({
+          icon: 'success',
+          title: t.checkoutTitle,
+          text: t.checkoutText,
+          timer: 3000,
+          showConfirmButton: false,
+          confirmButtonText: 'حسناً'
+        });
+        
+        // تفريغ الحقول
+        this.reset();
+      });
+
+      // --- روابط الأصناف ---
+      document.getElementById("salim-link").addEventListener("click", function () {
+        hideAllContents();
+        document.getElementById("salim-content").classList.remove("hidden");
+      });
+      document.getElementById("ready-veg-link").addEventListener("click", function () {
+        hideAllContents();
+        document.getElementById("ready-veg-content").classList.remove("hidden");
+      });
+      document.getElementById("on-cook-veg-link").addEventListener("click", function () {
+        hideAllContents();
+        document.getElementById("on-cook-veg-content").classList.remove("hidden");
+      });
+      document.getElementById("cooked-veg-link").addEventListener("click", function () {
+        hideAllContents();
+        document.getElementById("cooked-veg-content").classList.remove("hidden");
+      });
+      document.getElementById("takeaway-veg-link").addEventListener("click", function () {
+        hideAllContents();
+        document.getElementById("takeaway-veg-content").classList.remove("hidden");
+      });
+
+      // --- أزرار العودة ---
+      document.getElementById("back-button").addEventListener("click", function () {
+        document.getElementById("salim-content").classList.add("hidden");
+        document.getElementById("categories-content").classList.remove("hidden");
+      });
+      document.getElementById("ready-veg-back-button").addEventListener("click", function () {
+        document.getElementById("ready-veg-content").classList.add("hidden");
+        document.getElementById("categories-content").classList.remove("hidden");
+      });
+      document.getElementById("on-cook-veg-back-button").addEventListener("click", function () {
+        document.getElementById("on-cook-veg-content").classList.add("hidden");
+        document.getElementById("categories-content").classList.remove("hidden");
+      });
+      document.getElementById("cooked-veg-back-button").addEventListener("click", function () {
+        document.getElementById("cooked-veg-content").classList.add("hidden");
+        document.getElementById("categories-content").classList.remove("hidden");
+      });
+      document.getElementById("takeaway-veg-back-button").addEventListener("click", function () {
+        document.getElementById("takeaway-veg-content").classList.add("hidden");
+        document.getElementById("categories-content").classList.remove("hidden");
+      });
+
+      // --- دالة اختيار حجم الصينية (Global) ---
+      window.selectTraySize = function(btnElement, sizeName, price) {
+        // البحث عن البطاقة التي ينتمي إليها الزر
+        const trayCard = btnElement.closest('.tray-card');
+        
+        // تحديث جميع أزرار الحجم في هذه البطاقة (إزالة التحديد)
+        trayCard.querySelectorAll('.tray-size-btn').forEach(btn => {
+          btn.classList.remove('active');
+          btn.classList.add('inactive');
+        });
+
+        // تحديد الزر المختار
+        btnElement.classList.remove('inactive');
+        btnElement.classList.add('active');
+
+        // تحديث زر الإضافة للسلة في نفس البطاقة
+        const addToCartBtn = trayCard.querySelector('.add-to-cart');
+        const priceDisplay = trayCard.querySelector('.tray-price-display');
+        
+        addToCartBtn.setAttribute('data-name', sizeName);
+        addToCartBtn.setAttribute('data-price', price);
+        priceDisplay.textContent = `${price} ج.م`;
+        
+        // تغيير نص الزر ليعكس الحجم المختار
+        addToCartBtn.querySelector('span').textContent = `${sizeName}`; 
+      }
+
+      // --- تفعيل زر إضافة المنتجات في الصفحات ---
+      const productAddButtons = document.querySelectorAll('.add-to-cart');
+      productAddButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const name = this.getAttribute('data-name');
+          const price = parseFloat(this.getAttribute('data-price'));
+          
+          if(name && price) {
+            addToCart(name, price);
+          } else {
+            const t = translations[document.documentElement.lang];
+            Swal.fire({
+              icon: 'warning',
+              title: t.errorTitle,
+              text: t.errorSize,
+              confirmButtonText: 'حسناً'
+            });
+          }
+        });
+      });
+
+    });
+  </script>
+</body>
+</html>
